@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="Geekshub\ScheduleBundle\Entity\Schedule" class="Geekshub\ScheduleBundle\Entity\Schedule" public="false">
+            <tag name="kernel.reset" method="clear" />
+        </service>
+
+        <service id="geekshub_schedule" alias="Geekshub\ScheduleBundle\Entity\Schedule" public="true">
+        </service>
+
+
+        <!-- Templating helper -->
+        <service id="geekshub_schedule.helper" class="Geekshub\ScheduleBundle\Controller\GeekshubScheduleHelper" public="true">
+            <argument type="service" id="templating" />
+            <argument type="service" id="geekshub_schedule" />
+            <argument>%geekshub_schedule.options%</argument>
+
+            <tag name="templating.helper" alias="schedule"/>
+        </service>
+
+        <!-- Twig extension -->
+        <service id="geekshub_schedule.twig" class="Geekshub\ScheduleBundle\Twig\Extension\GeekshubScheduleTwigExtension" public="true">
+            <argument type="service" id="service_container" />
+            <tag name="twig.extension"/>
+        </service>
+
+
+    </services>
+
+</container>

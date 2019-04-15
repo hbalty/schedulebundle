@@ -1,0 +1,118 @@
+<div>
+
+    {% if gh_schedule() %}
+        {% set schedule = gh_schedule() %}
+    {% endif %}
+    <div style="overflow-x: scroll">
+        <table class="{{ style["tableClass"] }} bordered" border="1">
+            <tr class="{{ style["yearRowClass"] }}">
+                {# Years #}
+                <td> </td>
+                {% for year in schedule.getYears(gh_schedule().getStartDateTimeStamp(),gh_schedule().getEndDateTimeStamp(),show_weekends) %}
+                    <td colspan="{{ year[1] }}"> {{ year[0] }} </td>
+                {% endfor %}
+            </tr>
+
+            <tr class="{{ style["monthRowClass"] }}">
+                {# Months #}
+                <td>  </td>
+                {% for month in gh_schedule().getMonths(gh_schedule().getStartDateTimeStamp(),gh_schedule().getEndDateTimeStamp(), show_weekends) %}
+                    <td colspan="{{ month[1]  }}"> {{ month[0] }} </td>
+                {% endfor %}
+            </tr>
+
+            <tr class="{{ style["weekRowClass"] }}">
+                {# Weeks #}
+                <td>  </td>
+                {% for week in gh_schedule().getWeeks(gh_schedule().getStartDateTimeStamp(),gh_schedule().getEndDateTimeStamp(),show_weekends) %}
+                    <td  colspan="{{ week[1] }}"> W{{ week[0] }} </td>
+                {% endfor %}
+            </tr>
+
+            <tr class="{{ style["dayRowClass"] }}">
+                {# Days #}
+                <td>  </td>
+                {% for timestamp,day in gh_schedule().getDays(gh_schedule().getStartDateTimeStamp(),gh_schedule().getEndDateTimeStamp()) %}
+                    {% if show_weekends %}
+                        <td> {{ day }} </td>
+                    {% else %}
+                        {% if not schedule.isWeekend(timestamp) %}
+                            <td> {{ day }} </td>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </tr>
+
+        {% for a, b in gh_schedule().getGroupedTasks() %}
+            <tr class="{{ style["groupRowClass"] }}">
+                <td style="background-color: {{ separator_color }}"> {{ b.title }} </td>
+                {# setting up groups #}
+                {% for timestamp,day in gh_schedule().getDays(gh_schedule().getStartDateTimeStamp(),gh_schedule().getEndDateTimeStamp()) %}
+                    {% if show_weekends %}
+                        <td>   </td>
+                    {% else %}
+                        {% if not schedule.isWeekend(timestamp) %}
+                            <td style="font-size: xx-small; background-color: {{ separator_color }}">  </td>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% set supp = b.lines[0][0].label %}
+            {% for index ,tasks in b.lines %}
+                <tr class="{{ style["taskRowClass"] }}" data-before="{% if tasks[0].label != supp %}yes{% else %}no{% endif %}">
+                    <td> {{ tasks[0].label }} </td>
+                    {# Looping on two dates extermeties #}
+                    {% for timestamp,day in gh_schedule().getDays(gh_schedule().getStartDateTimeStamp(),gh_schedule().getEndDateTimeStamp()) %}
+                        {% set current = gh_verify_date(timestamp, tasks) %}
+                        {% if show_weekends %}
+                            {%  if current %}
+                                {%  if gh_isDelay(timestamp, current)  %}
+                                    {% if use_links %}
+                                        <td class="{{ style["taskCellDelayClass"] }}"> <a target="_blank" href="{% if current.link %} {{ current.link }} {% else %} # {% endif %}"> {% if gh_isFirstDay(timestamp, current) %}{{current.title }}{% endif %} </a></td>
+                                    {% else %}
+                                        <td class="{{ style["taskCellDelayClass"] }}"> {% if gh_isFirstDay(timestamp, current) %}{{current.title }}{% endif %}  </td>
+                                    {% endif %}
+                                {% else %}
+                                    {% if use_links %}
+                                        <td class="{{ style["taskCellClass"] }}"> <a target="_blank" href="{% if current.link %} {{ current.link }} {% else %} # {% endif %}"> {% if gh_isFirstDay(timestamp, current) %}{{ current.title }}{% endif %} </a></td>
+                                    {% else %}
+                                        <td class="{{ style["taskCellClass"] }}"> {% if gh_isFirstDay(timestamp, current) %}{{current.title }}{% endif %} </td>
+                                    {% endif %}
+                                {% endif %}
+                            {% else %}
+                                <td>  </td>
+                            {% endif %}
+                        {% else %}
+                            {% if not schedule.isWeekend(timestamp) %}
+
+                                {%  if current %}
+                                    {%  if gh_isDelay(timestamp, current)  %}
+                                        {% if use_links %}
+                                            <td class="{{ style["taskCellDelayClass"] }}"> <a target="_blank" href="{% if current.link %} {{ current.link }} {% else %} # {% endif %}"> {% if gh_isFirstDay(timestamp, current) %}{{current.title }}{% endif %} </a></td>
+                                        {% else %}
+                                            <td class="{{ style["taskCellDelayClass"] }}"> {% if gh_isFirstDay(timestamp, current) %}{{current.title }}{% endif %}  </td>
+                                        {% endif %}
+                                        {% else %}
+                                            {% if use_links %}
+                                                <td class="{{ style["taskCellClass"] }}"> <a target="_blank" href="{% if current.link %} {{ current.link }} {% else %} # {% endif %}"> {% if gh_isFirstDay(timestamp, current) %}{{ current.title }}{% endif %} </a></td>
+                                            {% else %}
+                                                <td class="{{ style["taskCellClass"] }}"> {% if gh_isFirstDay(timestamp, current) %}{{current.title }}{% endif %} </td>
+                                            {% endif %}
+                                    {% endif %}
+                                {% else %}
+                                    <td>  </td>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    {# end loop #}
+                </tr>
+                {% set supp = tasks[0].label %}
+            {% endfor %}
+
+        {% endfor %}
+        </table>
+    </div>
+
+</div>
+

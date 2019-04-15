@@ -1,3 +1,9 @@
+
+DEMO
+============
+You can find a demonstration of what the bundle does on : [geekshub.net](http://www.geeks-hub.net/)
+
+
 Installation
 ============
 
